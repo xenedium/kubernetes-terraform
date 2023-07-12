@@ -1,9 +1,11 @@
 # kubernetes-terraform
 IAC with Terraform for k8s deployment using DigitalOcean provider
 
-### Info
+### Infos
 
 SSH public keys and installation scripts are both remote resources because they are susceptible to change.
+
+Will add support for more nodes in future commits
 
 ```sh
 # public key
