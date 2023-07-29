@@ -50,6 +50,23 @@ resource "null_resource" "node_two_provisioning" {
   }
 }
 
+resource "null_resource" "apply_mlb" {
+  connection {
+    host        = digitalocean_domain.control_plane_domain
+    user        = "root"
+    type        = "ssh"
+    private_key = file(var.pvt_key_path)
+    timeout     = "2m"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "KUBECONFIG=/etc/kubernetes/admin.conf kubectl apply -f mlb.yaml"
+    ]
+  }
+  depends_on = [null_resource.node_one_provisioning, null_resource.node_two_provisioning]
+}
+
 data "external" "kube_token" {
   program    = ["sh", "-c", "ssh -i ssh/id_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@${digitalocean_domain.control_plane_domain.name} 'curl https://cdn.abderraziq.com/k8s/get-kube-token.sh | bash'"]
   depends_on = [null_resource.control_plane_provisioning]
@@ -58,9 +75,4 @@ data "external" "kube_token" {
 data "external" "kube_token_hash" {
   program    = ["sh", "-c", "ssh -i ssh/id_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@${digitalocean_domain.control_plane_domain.name} 'curl https://cdn.abderraziq.com/k8s/get-token-hash.sh | bash'"]
   depends_on = [null_resource.control_plane_provisioning]
-}
-
-data "external" "apply_mlb" {
-  program    = ["sh", "-c", "ssh -i ssh/id_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@${digitalocean_domain.control_plane_domain.name} 'KUBECONFIG=/etc/kubernetes/admin.conf kubectl apply -f mlb.yaml'"]
-  depends_on = [null_resource.node_one_provisioning, null_resource.node_two_provisioning]
 }
