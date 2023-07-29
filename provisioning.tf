@@ -9,7 +9,12 @@ resource "null_resource" "control_plane_provisioning" {
 
   provisioner "remote-exec" {
     inline = [
+      "#!/bin/bash",
       "curl https://cdn.abderraziq.com/k8s/init.sh | bash -s ${digitalocean_domain.control_plane_domain.name}",
+      "sed -i 's/0.0.0.0/${digitalocean_droplet.control_plane.ipv4_address}/g mlb.yaml'",
+      "sed -i 's/1.1.1.1/${digitalocean_droplet.node_one.ipv4_address}/g mlb.yaml'",
+      "sed -i 's/2.2.2.2/${digitalocean_droplet.node_two.ipv4_address}/g mlb.yaml'",
+      "KUBECONFIG=/etc/kubernetes/admin.conf kubectl apply -f mlb.yaml"
     ]
   }
 }
