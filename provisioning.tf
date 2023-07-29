@@ -52,7 +52,7 @@ resource "null_resource" "node_two_provisioning" {
 
 resource "null_resource" "apply_mlb" {
   connection {
-    host        = digitalocean_domain.control_plane_domain
+    host        = digitalocean_domain.control_plane_domain.name
     user        = "root"
     type        = "ssh"
     private_key = file(var.pvt_key_path)
